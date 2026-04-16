@@ -1,0 +1,52 @@
+====================================================
+  AquaPredict — MongoDB Setup
+====================================================
+✅ MongoDB Connected
+
+[Step 1] realtime_monitoring indexes...
+   ✅
+   Sample skipped (collection already has data) ✅
+[Step 2] test_sessions indexes...
+   ✅
+   Sample skipped ✅
+[Step 3] realtime_stream indexes...
+   ✅
+[Step 4] users indexes...
+   ✅
+
+====================================================
+  Setup Complete!
+====================================================
+  DB         : aquapredict
+  Collections: realtime_monitoring, test_sessions,
+               realtime_stream, users
+
+  Verify:
+    mongo aquapredict
+    db.realtime_monitoring.find().pretty()
+====================================================
+  AquaPredict — MongoDB Setup
+====================================================
+✅ MongoDB Connected
+
+[Step 1] realtime_monitoring indexes...
+   ✅
+   Sample skipped (collection already has data) ✅
+[Step 2] test_sessions indexes...
+   ✅
+   Sample skipped ✅
+[Step 3] realtime_stream indexes...
+   ✅
+[Step 4] users indexes...
+   ✅
+
+====================================================
+  Setup Complete!
+====================================================
+  DB         : aquapredict
+  Collections: realtime_monitoring, test_sessions,
+               realtime_stream, users
+
+  Verify:
+    mongo aquapredict
+    db.realtime_monitoring.find().pretty()

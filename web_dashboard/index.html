@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AquaPredict — Water Quality Dashboard</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c-blue:#1565c0;--c-blue-l:#e8f0fe;--c-teal:#00796b;--c-teal-l:#e0f2f1;
+  --c-amber:#e65100;--c-amber-l:#fff3e0;--c-green:#2e7d32;--c-green-l:#e8f5e9;
+  --c-purple:#6a1b9a;--c-purple-l:#f3e5f5;--c-red:#c62828;--c-red-l:#ffebee;
+  --c-gray:#455a64;--c-gray-l:#eceff1;
+  --bg:#f4f6f9;--card:#fff;--text:#1a2332;--muted:#607d8b;--border:#dde3ea;
+  --radius:14px;--shadow:0 2px 16px rgba(0,0,0,0.07);
+  --header-h:64px;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════════ */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(135deg,#0d47a1 0%,#1565c0 55%,#006064 100%);
+  height:var(--header-h);display:flex;align-items:center;
+  padding:0 24px;box-shadow:0 2px 12px rgba(0,0,0,0.25);gap:16px;
+}
+.header-logo{font-size:1.5rem;line-height:1}
+.header-title{flex:1}
+.header-title h1{color:#fff;font-size:1.15rem;font-weight:700;letter-spacing:.3px}
+.header-title p{color:rgba(255,255,255,0.7);font-size:.75rem;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:10px}
+.conn-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.12);border-radius:20px;
+  padding:5px 12px;color:#fff;font-size:.78rem;
+}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:#4caf50;flex-shrink:0}
+.conn-dot.red{background:#ef5350}
+.conn-dot.pulse{animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-sm{
+  padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:500;
+  cursor:pointer;border:1px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.1);color:#fff;transition:background .15s;
+}
+.btn-sm:hover{background:rgba(255,255,255,.22)}
+
+/* ═══════════════════════════════════════════════════════════
+   SETUP OVERLAY
+═══════════════════════════════════════════════════════════ */
+#overlay{
+  position:fixed;inset:0;background:rgba(13,71,161,.95);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+}
+.setup-card{
+  background:#fff;border-radius:20px;padding:40px;
+  max-width:460px;width:92%;text-align:center;
+}
+.setup-card .icon{font-size:3rem;margin-bottom:8px}
+.setup-card h2{font-size:1.25rem;margin-bottom:6px}
+.setup-card p{color:var(--muted);font-size:.87rem;margin-bottom:22px;line-height:1.6}
+.setup-card input{
+  width:100%;padding:12px 16px;border:2px solid var(--border);
+  border-radius:10px;font-size:1rem;margin-bottom:12px;
+  outline:none;text-align:center;letter-spacing:.5px;
+}
+.setup-card input:focus{border-color:var(--c-blue)}
+.setup-card .btn-connect{
+  width:100%;padding:13px;background:var(--c-blue);color:#fff;
+  border:none;border-radius:10px;font-size:1rem;font-weight:600;
+  cursor:pointer;margin-bottom:10px;transition:background .15s;
+}
+.setup-card .btn-connect:hover{background:#0d47a1}
+.setup-hint{
+  font-size:.8rem;color:var(--muted);background:#f5f7fa;
+  padding:12px 16px;border-radius:10px;text-align:left;line-height:1.8;
+}
+.setup-hint code{background:#e3eaf4;padding:1px 6px;border-radius:4px;font-size:.79rem}
+#setup-msg{font-size:.83rem;margin-top:10px;display:none;white-space:pre-line;min-height:18px}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════════ */
+.main{max-width:1280px;margin:0 auto;padding:22px 16px}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════════ */
+.tab-bar{
+  display:flex;gap:4px;background:var(--card);
+  border-radius:12px;padding:5px;
+  box-shadow:var(--shadow);width:fit-content;margin-bottom:20px;
+}
+.tab-btn{
+  padding:8px 20px;border:none;border-radius:8px;background:transparent;
+  color:var(--muted);font-size:.88rem;font-weight:500;cursor:pointer;
+  transition:all .18s;white-space:nowrap;
+}
+.tab-btn.active{background:var(--c-blue);color:#fff}
+.tab-btn:hover:not(.active){background:var(--bg)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* ═══════════════════════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════════════════════ */
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+  gap:14px;margin-bottom:20px;
+}
+.stat-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);
+  border-left:4px solid var(--c-blue);
+  display:flex;flex-direction:column;gap:4px;
+}
+.stat-card.teal  {border-left-color:var(--c-teal)}
+.stat-card.amber {border-left-color:var(--c-amber)}
+.stat-card.green {border-left-color:var(--c-green)}
+.stat-card.purple{border-left-color:var(--c-purple)}
+.stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat-val{font-size:2rem;font-weight:700;line-height:1.1}
+.stat-sub{font-size:.76rem;color:var(--muted)}
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════════════ */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;
+}
+.card-head{
+  padding:14px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.card-head h2{font-size:.97rem;font-weight:600}
+.card-body{padding:20px 22px}
+.card-body.nopad{padding:0}
+
+/* ═══════════════════════════════════════════════════════════
+   PARAMETER GRID
+═══════════════════════════════════════════════════════════ */
+.param-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.param-box{
+  background:linear-gradient(145deg,#f8faff,#edf2ff);
+  border-radius:12px;padding:14px 10px;text-align:center;
+  border:1px solid #e3eaf7;
+}
+.param-val{font-size:1.65rem;font-weight:700;color:var(--c-blue);line-height:1}
+.param-unit{font-size:.7rem;color:var(--muted);margin-top:2px}
+.param-name{font-size:.78rem;color:var(--text);margin-top:5px;font-weight:500}
+
+/* ═══════════════════════════════════════════════════════════
+   TAGS
+═══════════════════════════════════════════════════════════ */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.tag{padding:4px 12px;border-radius:20px;font-size:.79rem;font-weight:500;white-space:nowrap}
+.tag.sp{background:var(--c-blue-l);color:var(--c-blue)}
+.tag.pr{background:var(--c-red-l);color:var(--c-red)}
+.tag.su{background:var(--c-teal-l);color:var(--c-teal)}
+.tag.mi{background:var(--c-green-l);color:var(--c-green)}
+.tag.bo{background:var(--c-amber-l);color:var(--c-amber)}
+.tag.vg{background:var(--c-purple-l);color:var(--c-purple)}
+
+/* ═══════════════════════════════════════════════════════════
+   STOCKING RATIO BARS
+═══════════════════════════════════════════════════════════ */
+.ratio-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.ratio-name{width:105px;font-size:.82rem;flex-shrink:0;font-weight:500}
+.ratio-track{flex:1;background:#eef2f7;border-radius:6px;height:14px;overflow:hidden}
+.ratio-fill{height:100%;background:linear-gradient(90deg,var(--c-teal),#4db6ac);
+  border-radius:6px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.ratio-pct{font-size:.8rem;color:var(--muted);width:36px;text-align:right;flex-shrink:0}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════════ */
+.data-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.data-table th{
+  background:#f5f8fc;text-align:left;padding:10px 14px;
+  color:var(--muted);font-size:.72rem;text-transform:uppercase;
+  letter-spacing:.05em;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.data-table td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:#f8fbff}
+
+/* ═══════════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════════ */
+.badge{padding:3px 10px;border-radius:12px;font-size:.73rem;font-weight:600;white-space:nowrap}
+.badge.green {background:var(--c-green-l);color:var(--c-green)}
+.badge.red   {background:var(--c-red-l)  ;color:var(--c-red)}
+.badge.blue  {background:var(--c-blue-l) ;color:var(--c-blue)}
+.badge.amber {background:var(--c-amber-l);color:var(--c-amber)}
+
+/* ═══════════════════════════════════════════════════════════
+   INFO ROW
+═══════════════════════════════════════════════════════════ */
+.info-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:16px}
+.info-item .il{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.info-item .iv{font-size:.95rem;font-weight:600;margin-top:3px}
+
+/* ═══════════════════════════════════════════════════════════
+   TWO COLUMN
+═══════════════════════════════════════════════════════════ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════════════════════════ */
+.slbl{
+  font-size:.72rem;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.06em;margin:14px 0 6px;font-weight:600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHONE SEARCH + AMMONIA UPDATE
+═══════════════════════════════════════════════════════════ */
+.search-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.search-row input{
+  padding:9px 14px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:.9rem;min-width:200px;outline:none;
+}
+.search-row input:focus{border-color:var(--c-blue)}
+.btn-primary{
+  padding:9px 20px;background:var(--c-blue);color:#fff;
+  border:none;border-radius:9px;font-size:.9rem;
+  cursor:pointer;font-weight:500;transition:background .15s;
+}
+.btn-primary:hover{background:#0d47a1}
+.btn-outline{
+  padding:9px 16px;background:transparent;border:1.5px solid var(--border);
+  border-radius:9px;font-size:.85rem;cursor:pointer;color:var(--muted);
+  transition:background .15s;
+}
+.btn-outline:hover{background:var(--bg)}
+
+/* ═══════════════════════════════════════════════════════════
+   AMMONIA UPDATE BOX
+═══════════════════════════════════════════════════════════ */
+.ammonia-box{
+  display:flex;align-items:center;gap:10px;
+  background:var(--c-amber-l);border:1px solid #ffcc80;
+  border-radius:10px;padding:12px 16px;margin-bottom:20px;
+  flex-wrap:wrap;
+}
+.ammonia-box span{font-size:.87rem;color:var(--c-amber);font-weight:500}
+.ammonia-box input{
+  padding:7px 10px;border:1.5px solid #ffb74d;border-radius:8px;
+  font-size:.9rem;width:90px;outline:none;background:#fff;
+}
+.ammonia-box input:focus{border-color:var(--c-amber)}
+.btn-ammonia{
+  padding:7px 14px;background:var(--c-amber);color:#fff;
+  border:none;border-radius:8px;font-size:.85rem;font-weight:500;cursor:pointer;
+}
+.btn-ammonia:hover{background:#bf360c}
+#ammonia-feedback{font-size:.8rem;color:var(--c-green);display:none}
+
+/* ═══════════════════════════════════════════════════════════
+   EMPTY / LOADING
+═══════════════════════════════════════════════════════════ */
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:.88rem}
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:.88rem}
+.spinner{
+  display:inline-block;width:20px;height:20px;
+  border:3px solid var(--border);border-top-color:var(--c-blue);
+  border-radius:50%;animation:spin .75s linear infinite;
+  vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════════════════════ */
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+@media(max-width:640px){
+  .header{padding:0 14px}.header-title h1{font-size:1rem}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .card-body{padding:14px}
+  .main{padding:14px 10px}
+}
+@media(max-width:380px){.stat-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SETUP OVERLAY
+═══════════════════════════════════════════════════════════ -->
+<div id="overlay">
+  <div class="setup-card">
+    <div class="icon">🐟</div>
+    <h2>AquaPredict Dashboard</h2>
+    <p>Enter your <strong>Jetson Nano IP address</strong><br>to connect to live monitoring data.</p>
+    <input type="text" id="ip-input" placeholder="192.168.1.XXX" maxlength="60"
+           onkeydown="if(event.key==='Enter')doConnect()">
+    <button class="btn-connect" onclick="doConnect()">Connect to Jetson</button>
+    <div id="setup-msg"></div>
+    <div class="setup-hint">
+      <strong>Find your Jetson Nano IP:</strong><br>
+      Open terminal on Jetson → type <code>hostname -I</code><br>
+      Use the first number shown, e.g. <code>192.168.1.105</code><br><br>
+      <strong>Make sure these are running on Jetson:</strong><br>
+      • <code>mongod --dbpath /data/db</code><br>
+      • <code>python3 dashboard_api.py</code>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-logo">🐟</div>
+  <div class="header-title">
+    <h1>AquaPredict — Water Quality Monitor</h1>
+    <p>AI-Based Offline Fish Species Prediction · Jetson Nano 2GB</p>
+  </div>
+  <div class="header-right">
+    <div class="conn-pill">
+      <span class="conn-dot pulse" id="cdot"></span>
+      <span id="ctext">Connecting...</span>
+    </div>
+    <button class="btn-sm" onclick="showOverlay()">⚙ Change IP</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('rt',this)">📡 Realtime Monitoring</button>
+    <button class="tab-btn"        onclick="switchTab('ts',this)">🧪 Test Sessions</button>
+    <button class="tab-btn"        onclick="switchTab('ctrl',this)">⚙ Controls</button>
+  </div>
+
+  <!-- ═══ TAB: REALTIME ═══════════════════════════════════ -->
+  <div id="tab-rt" class="tab-pane active">
+
+    <!-- Stat cards -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-lbl">Total Readings</div>
+        <div class="stat-val" id="s-reads">–</div>
+        <div class="stat-sub">since system start</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-lbl">Total Tests</div>
+        <div class="stat-val" id="s-tests">–</div>
+        <div class="stat-sub">saved sessions</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-lbl">Latest pH</div>
+        <div class="stat-val" id="s-ph">–</div>
+        <div class="stat-sub">water parameter</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-lbl">Dissolved O₂</div>
+        <div class="stat-val" id="s-do">–</div>
+        <div class="stat-sub">mg/L</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-lbl">Temperature</div>
+        <div class="stat-val" id="s-temp">–</div>
+        <div class="stat-sub">°C</div>
+      </div>
+    </div>
+
+    <!-- Latest reading detail -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Latest Sensor Reading &amp; Prediction</h2>
+        <button class="btn-outline" onclick="loadAll()">↻ Refresh</button>
+      </div>
+      <div class="card-body" id="latest-body">
+        <div class="loading"><span class="spinner"></span>Loading latest data...</div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Monitoring History</h2>
+        <span style="font-size:.8rem;color:var(--muted)">Last 20 readings</span>
+      </div>
+      <div class="card-body nopad" style="overflow-x:auto" id="hist-body">
+        <div class="loading"><span class="spinner"></span>Loading...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ TAB: TEST SESSIONS ═══════════════════════════════ -->
+  <div id="tab-ts" class="tab-pane">
+    <div class="card">
+      <div class="card-head"><h2>Test Sessions by Phone ID</h2></div>
+      <div class="card-body">
+        <div class="search-row">
+          <input type="text" id="ph-input" placeholder="e.g. 919876543210"
+                 value="919876543210"
+                 onkeydown="if(event.key==='Enter')loadTests()">
+          <button class="btn-primary" onclick="loadTests()">Search</button>
+        </div>
+        <div id="tests-body">
+          <div class="empty">Enter a phone number and press Search</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: CONTROLS ════════════════════════════════════ -->
+  <div id="tab-ctrl" class="tab-pane">
+    <div class="card">
+      <div class="card-head"><h2>Update Ammonia Value</h2></div>
+      <div class="card-body">
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          The ESP32 does not have an ammonia sensor. Read ammonia from your
+          handheld meter and update the value here. Pipeline 2 (continuous)
+          reads this value for every new sensor reading.
+        </p>
+        <div class="ammonia-box">
+          <span>🧪 Current ammonia stored:</span>
+          <strong id="cur-ammonia" style="color:var(--c-amber)">– mg/L</strong>
+          <input type="number" id="nh3-input" step="0.01" min="0" max="10"
+                 placeholder="0.00">
+          <button class="btn-ammonia" onclick="updateAmmonia()">Update</button>
+          <span id="ammonia-feedback">✅ Saved!</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted)">
+          You can also update from Jetson terminal:&nbsp;
+          <code style="background:#f5f7fa;padding:2px 6px;border-radius:4px">echo "0.5" &gt; ~/aquapredict/ammonia.txt</code>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>System Status</h2></div>
+      <div class="card-body" id="sys-status">
+        <div class="loading"><span class="spinner"></span>Loading...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let API = localStorage.getItem("aq_api") || "";
+let refreshTimer = null;
+
+// ═══════════════════════════════════════════════════════════
+// OVERLAY
+// ═══════════════════════════════════════════════════════════
+function showOverlay() {
+  document.getElementById("overlay").style.display = "flex";
+  if (API) document.getElementById("ip-input").value =
+    API.replace("http://","").replace(":5000","");
+}
+function hideOverlay() {
+  document.getElementById("overlay").style.display = "none";
+}
+
+async function doConnect() {
+  const raw = (document.getElementById("ip-input").value || "").trim();
+  const msg = document.getElementById("setup-msg");
+  msg.style.display = "none";
+
+  if (!raw) { showMsg("Please enter an IP address.", "red"); return; }
+
+  let ip  = raw.replace(/^https?:\/\//,"").replace(/:.*/,"").replace(/\/$/,"");
+  let url = `http://${ip}:5000`;
+
+  showMsg("Testing connection…", "#1565c0");
+
+  try {
+    const r = await fetch(url + "/api/health", { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    API = url;
+    localStorage.setItem("aq_api", API);
+    setConn(true, ip + ":5000");
+    hideOverlay();
+    loadAll();
+    loadAmmonia();
+    startRefresh();
+  } catch(e) {
+    showMsg(`❌ Cannot connect to ${url}\n\n• Make sure dashboard_api.py is running on Jetson\n• Check the IP address is correct\n• Both devices must be on same Wi-Fi`, "red");
+  }
+}
+
+function showMsg(t, c="#e53935") {
+  const el = document.getElementById("setup-msg");
+  el.textContent = t; el.style.color = c; el.style.display = "block";
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONNECTION STATUS
+// ═══════════════════════════════════════════════════════════
+function setConn(ok, label) {
+  const dot  = document.getElementById("cdot");
+  const text = document.getElementById("ctext");
+  dot.className  = "conn-dot" + (ok ? " pulse" : " red");
+  text.textContent = ok ? label : "Disconnected";
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  btn.classList.add("active");
+  if (id === "ctrl") { loadAmmonia(); loadSysStatus(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOAD ALL (called on connect + auto-refresh)
+// ═══════════════════════════════════════════════════════════
+function loadAll() {
+  if (!API) return;
+  loadStats();
+  loadLatest();
+  loadHistory();
+}
+
+function startRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    if (document.getElementById("tab-rt").classList.contains("active")) loadAll();
+  }, 30000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════════
+async function api(path, opts) {
+  const r = await fetch(API + path, { signal: AbortSignal.timeout(7000), ...opts });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+function set(id, v) { const e=document.getElementById(id); if(e) e.textContent=v; }
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+async function loadStats() {
+  try {
+    const d = await api("/api/stats");
+    set("s-reads", d.totalReadings ?? "–");
+    set("s-tests", d.totalTests    ?? "–");
+    if (d.lastUpdated) {
+      setConn(true, "Updated " + new Date(d.lastUpdated).toLocaleTimeString());
+    }
+  } catch(e) {
+    setConn(false, "Connection lost");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LATEST READING
+// ═══════════════════════════════════════════════════════════
+async function loadLatest() {
+  const el = document.getElementById("latest-body");
+  try {
+    const d = await api("/api/realtime/latest");
+    if (d.error) {
+      el.innerHTML = '<div class="empty">No sensor readings yet.<br>Make sure a pipeline is running and ESP32-RX is connected.</div>';
+      return;
+    }
+
+    const wp = d.waterParameters || {};
+    const fp = d.fishPrediction  || {};
+    const sd = d.stackingData    || {};
+    const sr = sd.stockingRatio  || {};
+
+    // Update stat cards
+    set("s-ph",   wp.ph              ?? "–");
+    set("s-do",   wp.dissolvedOxygen ?? "–");
+    set("s-temp", wp.temperature     ?? "–");
+
+    // Species tags
+    const spHtml = (fp.predictedSpecies||[]).map(s=>`<span class="tag sp">${s}</span>`).join("");
+    const prHtml = (fp.removedPredators||[]).map(s=>`<span class="tag pr">⚠ ${s}</span>`).join("");
+
+    // Zone groups
+    const gs = fp.groupedSpecies || {};
+    const zones = [
+      ["Surface",    gs.surface    || [], "su"],
+      ["Middle",     gs.middle     || [], "mi"],
+      ["Bottom",     gs.bottom     || [], "bo"],
+      ["Vegetation", gs.vegetation || [], "vg"]
+    ].filter(z=>z[1].length).map(([lbl,arr,cls])=>
+      `<div style="margin-top:5px;font-size:.82rem">
+         <span style="color:var(--muted);margin-right:5px">${lbl}:</span>
+         ${arr.map(s=>`<span class="tag ${cls}" style="font-size:.75rem;padding:2px 8px">${s}</span>`).join(" ")}
+       </div>`
+    ).join("");
+
+    // Ratio bars
+    const ratioHtml = Object.entries(sr).map(([name, pct])=>
+      `<div class="ratio-row">
+         <div class="ratio-name">${name}</div>
+         <div class="ratio-track"><div class="ratio-fill" style="width:${pct}%"></div></div>
+         <div class="ratio-pct">${pct}%</div>
+       </div>`
+    ).join("");
+
+    const pc = sd.priority==="High"?"green":sd.priority==="Medium"?"amber":"blue";
+    const sc = sd.status==="Approved"?"green":"red";
+    const dt = d.createdAt ? new Date(d.createdAt).toLocaleString() : "–";
+
+    el.innerHTML = `
+      <div class="param-grid">
+        ${pb("pH",           wp.ph,             "")}
+        ${pb("Dissolved O₂", wp.dissolvedOxygen,"mg/L")}
+        ${pb("Temperature",  wp.temperature,    "°C")}
+        ${pb("Turbidity",    wp.turbidity,      "NTU")}
+        ${pb("Ammonia",      wp.ammonia,        "mg/L")}
+      </div>
+      <hr class="divider">
+      <div class="two-col">
+        <div>
+          <div class="slbl">Predicted Species</div>
+          <div class="tags">${spHtml || '<span style="color:var(--muted);font-size:.85rem">None predicted</span>'}</div>
+          ${prHtml ? `<div class="slbl">Removed Predators</div><div class="tags">${prHtml}</div>` : ""}
+          ${zones  ? `<div class="slbl">Grouped by Zone</div>${zones}` : ""}
+        </div>
+        <div>
+          <div class="slbl">Stocking Ratio</div>
+          ${ratioHtml || '<div style="color:var(--muted);font-size:.85rem">No ratio data</div>'}
+          <div class="info-row">
+            <div class="info-item"><div class="il">Culture System</div><div class="iv">${sd.cultureSystem||"–"}</div></div>
+            <div class="info-item"><div class="il">Priority</div><div class="iv"><span class="badge ${pc}">${sd.priority||"–"}</span></div></div>
+            <div class="info-item"><div class="il">Status</div><div class="iv"><span class="badge ${sc}">${sd.status||"–"}</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-size:.77rem;color:var(--muted)">
+        Test #${d.testNumber||"?"} &nbsp;·&nbsp; ${d.projectTitle||""} &nbsp;·&nbsp; ${dt}
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty">Cannot load data.<br>Is dashboard_api.py running on Jetson?</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY TABLE
+// ═══════════════════════════════════════════════════════════
+async function loadHistory() {
+  const wrap = document.getElementById("hist-body");
+  try {
+    const rows = await api("/api/realtime?limit=20");
+    if (!rows.length) { wrap.innerHTML = '<div class="empty">No readings yet</div>'; return; }
+
+    const tbody = rows.map(d => {
+      const wp = d.waterParameters || {};
+      const fp = d.fishPrediction  || {};
+      const sd = d.stackingData    || {};
+      const sp = (fp.predictedSpecies||[]).slice(0,2).join(", ")+((fp.predictedSpecies||[]).length>2?"…":"");
+      const sc = sd.status==="Approved"?"green":"red";
+      const dt = d.createdAt ? new Date(d.createdAt).toLocaleString() : "–";
+      return `<tr>
+        <td><strong>${d.testNumber??""}</strong></td>
+        <td>${wp.ph??""}</td>
+        <td>${wp.dissolvedOxygen??""}</td>
+        <td>${wp.temperature??""}°C</td>
+        <td>${wp.ammonia??""}</td>
+        <td>${wp.turbidity??""}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sp}</td>
+        <td>${sd.cultureSystem||"–"}</td>
+        <td><span class="badge ${sc}">${sd.status||"–"}</span></td>
+        <td style="font-size:.75rem;color:var(--muted);white-space:nowrap">${dt}</td>
+      </tr>`;
+    }).join("");
+
+    wrap.innerHTML = `<table class="data-table">
+      <thead><tr>
+        <th>#</th><th>pH</th><th>DO</th><th>Temp</th><th>NH₃</th>
+        <th>Turbidity</th><th>Species</th><th>System</th><th>Status</th><th>Time</th>
+      </tr></thead><tbody>${tbody}</tbody></table>`;
+  } catch {
+    wrap.innerHTML = '<div class="empty">Cannot load history</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEST SESSIONS
+// ═══════════════════════════════════════════════════════════
+async function loadTests() {
+  const phone = (document.getElementById("ph-input").value||"").trim();
+  const wrap  = document.getElementById("tests-body");
+  if (!phone) { wrap.innerHTML='<div class="empty">Please enter a phone number</div>'; return; }
+  wrap.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+
+  try {
+    const rows = await api("/api/tests/" + encodeURIComponent(phone));
+    if (!rows.length) {
+      wrap.innerHTML = `<div class="empty">No test sessions found for <strong>${phone}</strong></div>`;
+      return;
+    }
+
+    const cards = rows.map((d, i) => {
+      const wp   = d.waterParameters || {};
+      const pred = d.prediction      || {};
+      const dt   = d.testedAt ? new Date(d.testedAt).toLocaleString() : "–";
+      const sc   = pred.status==="Approved"?"green":"red";
+      const tags = (pred.predictedSpecies||[]).map(s=>`<span class="tag sp">${s}</span>`).join(" ");
+      const ratio= Object.entries(pred.stockingRatio||{}).map(([n,v])=>
+        `<div class="ratio-row" style="margin-bottom:6px">
+           <div class="ratio-name" style="width:90px;font-size:.78rem">${n}</div>
+           <div class="ratio-track"><div class="ratio-fill" style="width:${v}%"></div></div>
+           <div class="ratio-pct" style="font-size:.77rem">${v}%</div>
+         </div>`).join("");
+
+      return `<div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <div>
+            <div style="font-weight:600;font-size:.97rem">${d.sessionName||"Test Session"}</div>
+            <div style="font-size:.76rem;color:var(--muted);margin-top:2px">
+              Test ${d.testIndex||i+1} &nbsp;·&nbsp; ${d.phoneId} &nbsp;·&nbsp; ${dt}
+            </div>
+          </div>
+          <span class="badge ${sc}">${pred.status||"–"}</span>
+        </div>
+        <div class="card-body">
+          <div class="param-grid">
+            ${pb("pH",          wp.ph,             "")}
+            ${pb("DO",          wp.dissolvedOxygen,"mg/L")}
+            ${pb("Temperature", wp.temperature,    "°C")}
+            ${pb("Ammonia",     wp.ammonia,        "mg/L")}
+            ${pb("Turbidity",   wp.turbidity,      "NTU")}
+          </div>
+          <div class="two-col" style="gap:16px">
+            <div>
+              <div class="slbl">Predicted Species</div>
+              <div class="tags">${tags||"None"}</div>
+            </div>
+            <div>
+              <div class="slbl">Stocking Ratio</div>
+              ${ratio||"–"}
+              <div class="info-row" style="margin-top:10px">
+                <div class="info-item"><div class="il">System</div><div class="iv">${pred.cultureSystem||"–"}</div></div>
+                <div class="info-item"><div class="il">Priority</div><div class="iv">${pred.priority||"–"}</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+    wrap.innerHTML = `<div style="font-size:.83rem;color:var(--muted);margin-bottom:12px">
+      ${rows.length} session(s) found for ${phone}</div>` + cards;
+  } catch {
+    wrap.innerHTML = '<div class="empty">Error connecting to API</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTROLS TAB
+// ═══════════════════════════════════════════════════════════
+async function loadAmmonia() {
+  if (!API) return;
+  try {
+    const d = await api("/api/ammonia");
+    set("cur-ammonia", d.value + " mg/L");
+  } catch {}
+}
+
+async function updateAmmonia() {
+  const val = document.getElementById("nh3-input").value.trim();
+  const fb  = document.getElementById("ammonia-feedback");
+  fb.style.display = "none";
+  if (!val || isNaN(val)) { alert("Please enter a valid number"); return; }
+
+  try {
+    const d = await api("/api/ammonia", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({value: parseFloat(val)})
+    });
+    if (d.success) {
+      set("cur-ammonia", d.value + " mg/L");
+      document.getElementById("nh3-input").value = "";
+      fb.style.display = "inline";
+      setTimeout(() => fb.style.display="none", 3000);
+    }
+  } catch(e) {
+    alert("Failed to update ammonia: " + e.message);
+  }
+}
+
+async function loadSysStatus() {
+  if (!API) return;
+  const el = document.getElementById("sys-status");
+  try {
+    const [stats, latest] = await Promise.all([
+      api("/api/stats"),
+      api("/api/realtime/latest").catch(()=>null)
+    ]);
+    const lastTime = stats.lastUpdated
+      ? new Date(stats.lastUpdated).toLocaleString()
+      : "Never";
+
+    el.innerHTML = `
+      <div class="info-row" style="margin-bottom:18px">
+        <div class="info-item"><div class="il">Total Readings</div><div class="iv">${stats.totalReadings}</div></div>
+        <div class="info-item"><div class="il">Total Tests</div><div class="iv">${stats.totalTests}</div></div>
+        <div class="info-item"><div class="il">Last Reading</div><div class="iv" style="font-size:.85rem">${lastTime}</div></div>
+      </div>
+      <p style="font-size:.83rem;color:var(--muted);line-height:1.7">
+        <strong>Pipeline commands (Jetson terminal):</strong><br>
+        Start Pipeline 1 (manual): &nbsp;<code style="background:#f5f7fa;padding:2px 5px;border-radius:4px">python3 pipeline1_manual.py</code><br>
+        Start Pipeline 2 (auto): &nbsp;&nbsp;<code style="background:#f5f7fa;padding:2px 5px;border-radius:4px">python3 pipeline2_continuous.py</code><br>
+        Update ammonia: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code style="background:#f5f7fa;padding:2px 5px;border-radius:4px">echo "0.3" &gt; ~/aquapredict/ammonia.txt</code>
+      </p>`;
+  } catch {
+    el.innerHTML = '<div class="empty">Cannot load system status</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function pb(name, val, unit) {
+  return `<div class="param-box">
+    <div class="param-val">${val??'–'}</div>
+    <div class="param-unit">${unit}</div>
+    <div class="param-name">${name}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+if (API) {
+  hideOverlay();
+  loadAll();
+  loadAmmonia();
+  startRefresh();
+} else {
+  showOverlay();
+}
+</script>
+</body>
+</html>

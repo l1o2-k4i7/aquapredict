@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aqua Pro — Project Management</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <!-- Bubble Animation Container -->
+  <div class="bubbles-container" id="bubblesContainer"></div>
+  <!-- Wave Animation -->
+  <div class="wave-container">
+    <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <path fill="rgba(44,83,100,0.15)"
+        d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,170.7C960,160,1056,192,1152,197.3C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+      </path>
+    </svg>
+    <svg class="wave wave2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <path fill="rgba(44,83,100,0.10)"
+        d="M0,256L48,240C96,224,192,192,288,181.3C384,171,480,181,576,186.7C672,192,768,192,864,176C960,160,1056,128,1152,133.3C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+      </path>
+    </svg>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div class="login-overlay active" id="loginOverlay">
+    <div class="login-container">
+      <div class="login-card glass-card">
+        <div class="login-header">
+          <div class="login-icon">
+            <i class="fas fa-water"></i>
+          </div>
+          <h1>Aqua<strong>Pro</strong></h1>
+          <p class="login-subtitle">Sign in to your account</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <div class="login-field">
+            <label for="loginUser"><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="loginUser" placeholder="Enter username" value="keerthi" autocomplete="username"
+              required>
+          </div>
+          <div class="login-field">
+            <label for="loginPass"><i class="fas fa-lock"></i> Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="loginPass" placeholder="Enter password" value="keerthi@18"
+                autocomplete="current-password" required>
+              <button type="button" class="toggle-pass" id="togglePass"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="login-error" id="loginError"></div>
+          <button type="submit" class="btn btn-primary btn-glow login-btn">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+        </form>
+        <div class="login-footer-text">
+          <i class="fas fa-shield-alt"></i> Secured Access
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <div class="logo">
+        <i class="fas fa-water"></i>
+        <span>Aqua<strong>Pro</strong></span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-link" data-page="projects"><i class="fas fa-brain"></i> Prediction</a>
+        <a href="#" class="nav-link" data-page="monitoring"><i class="fas fa-wave-square"></i> Monitoring</a>
+        <a href="#" class="nav-link" data-page="create-test"><i class="fas fa-vial"></i> Create Test</a>
+        <a href="#" class="nav-link" data-page="create"><i class="fas fa-plus-circle"></i> Create Project</a>
+        <a href="#" class="nav-link nav-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- HOME PAGE -->
+    <section class="page page-home active" id="page-home">
+      <div class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">Aquaculture Project<br><span class="gradient-text">Management System</span></h1>
+          <p class="hero-subtitle">A premium platform for managing aquaculture projects, water quality testing, fish
+            species prediction, and stacking analysis — all in one place.</p>
+          <div class="hero-stats">
+            <div class="stat-card glass-card">
+              <i class="fas fa-project-diagram"></i>
+              <span class="stat-num" id="statProjects">0</span>
+              <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat-card glass-card">
+              <i class="fas fa-flask"></i>
+              <span class="stat-num" id="statTests">0</span>
+              <span class="stat-label">Total Tests</span>
+            </div>
+            <div class="stat-card glass-card">
+              <i class="fas fa-fish"></i>
+              <span class="stat-num" id="statSpecies">0</span>
+              <span class="stat-label">Species Tracked</span>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-glow" onclick="navigateTo('projects')"><i class="fas fa-arrow-right"></i>
+            View Projects</button>
+
+          <div class="mode-select-grid">
+            <div class="mode-card glass-card">
+              <h3><i class="fas fa-brain"></i> Prediction Mode</h3>
+              <p>Use existing ML workflow for project-wise prediction and reporting.</p>
+              <button class="btn btn-primary" onclick="navigateTo('projects')"><i class="fas fa-arrow-right"></i> Go to
+                /prediction</button>
+            </div>
+            <div class="mode-card glass-card">
+              <h3><i class="fas fa-wave-square"></i> Monitoring Mode</h3>
+              <p>Track minute-wise water quality trends using live graphs and table drill-down.</p>
+              <button class="btn btn-secondary" onclick="navigateTo('monitoring')"><i class="fas fa-chart-line"></i> Go
+                to /monitoring</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MONITORING PAGE -->
+    <section class="page page-monitoring" id="page-monitoring">
+      <div class="monitoring-page-header glass-card">
+        <div>
+          <h2><i class="fas fa-wave-square"></i> Water Monitoring Dashboard</h2>
+          <p class="monitoring-subtitle">Mode: <span class="mode-indicator">Monitoring</span> | Auto-refresh every 1
+            minute</p>
+        </div>
+        <button class="btn btn-back" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</button>
+      </div>
+
+      <!-- Predictive Insights Panel -->
+      <div class="predictions-panel glass-card" id="predictionsPanel" style="display:none;">
+        <div class="predictions-header">
+          <h3><i class="fas fa-magic"></i> Predictive Insights (Next 30 Mins)</h3>
+          <span class="live-pulse"></span>
+        </div>
+        <p class="predictions-subtitle">AI-assisted forecasting based on real-minute history.</p>
+        <div class="predictions-grid" id="predictionsGrid">
+          <!-- Dynamically filled by JS -->
+        </div>
+      </div>
+
+      <div class="monitoring-grid">
+        <div class="monitor-chart-card glass-card">
+          <h4><i class="fas fa-vial"></i> pH</h4>
+          <div class="monitor-chart-scroll">
+            <canvas id="monitorChart-pH"></canvas>
+          </div>
+        </div>
+        <div class="monitor-chart-card glass-card">
+          <h4><i class="fas fa-water"></i> Dissolved Oxygen</h4>
+          <div class="monitor-chart-scroll">
+            <canvas id="monitorChart-dissolvedOxygen"></canvas>
+          </div>
+        </div>
+        <div class="monitor-chart-card glass-card">
+          <h4><i class="fas fa-cloud-rain"></i> Turbidity</h4>
+          <div class="monitor-chart-scroll">
+            <canvas id="monitorChart-turbidity"></canvas>
+          </div>
+        </div>
+        <div class="monitor-chart-card glass-card">
+          <h4><i class="fas fa-temperature-three-quarters"></i> Temperature</h4>
+          <div class="monitor-chart-scroll">
+            <canvas id="monitorChart-temperature"></canvas>
+          </div>
+        </div>
+        <div class="monitor-chart-card glass-card">
+          <h4><i class="fas fa-flask-vial"></i> Ammonia</h4>
+          <div class="monitor-chart-scroll">
+            <canvas id="monitorChart-ammonia"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="monitoring-meta glass-card" id="monitoringMeta">Loading monitoring records...</div>
+
+      <div class="monitoring-table-card glass-card" id="monitoringTableCard" style="display:none;">
+        <h4><i class="fas fa-table"></i> Minute-wise Monitoring Data</h4>
+        <div class="monitoring-table-wrap">
+          <table class="monitoring-table" id="monitoringTable">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>pH</th>
+                <th>DO</th>
+                <th>Turbidity</th>
+                <th>Temperature</th>
+                <th>Ammonia</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS LIST PAGE -->
+    <section class="page page-projects" id="page-projects">
+      <div class="page-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2><i class="fas fa-folder-open"></i> All Projects</h2>
+          <button class="btn btn-primary" onclick="navigateTo('create')"><i class="fas fa-plus"></i> New Project</button>
+        </div>
+        <div class="search-bar" style="position: relative;">
+          <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+          <input type="text" id="projectSearch" placeholder="Search projects by name..." oninput="filterProjects()" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: #fff;">
+        </div>
+      </div>
+      <div class="projects-grid" id="projectsGrid">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <i class="fas fa-water"></i>
+        <p>No projects yet. Start by creating your first project!</p>
+        <button class="btn btn-primary" onclick="navigateTo('create')">Create Project</button>
+      </div>
+    </section>
+
+    <!-- CREATE PROJECT PAGE -->
+    <section class="page page-create" id="page-create">
+      <div class="form-container glass-card">
+        <h2><i class="fas fa-plus-circle"></i> Create New Project</h2>
+        <form id="createProjectForm" novalidate>
+          <div class="form-group">
+            <label for="projName"><i class="fas fa-user"></i> Name</label>
+            <input type="text" id="projName" placeholder="Enter project owner name" required>
+            <span class="error-msg" id="errName"></span>
+          </div>
+          <div class="form-group">
+            <label for="projPhone"><i class="fas fa-phone"></i> Phone Number (Unique ID)</label>
+            <input type="tel" id="projPhone" placeholder="Enter unique phone number" required>
+            <span class="error-msg" id="errPhone"></span>
+          </div>
+          <div class="form-group">
+            <label for="projEmail"><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" id="projEmail" placeholder="Enter email address" required>
+            <span class="error-msg" id="errEmail"></span>
+          </div>
+          <div class="form-group">
+            <label for="projPlace"><i class="fas fa-map-marker-alt"></i> Place</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <input type="text" id="projPlace" placeholder="Enter location or mark on map" required style="flex:1;">
+              <button type="button" class="btn btn-secondary" id="btnToggleMap" style="white-space: nowrap;"><i class="fas fa-map"></i> Map</button>
+            </div>
+            <div id="mapContainer" style="display:none; height: 300px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--glass-border); position: relative; z-index: 1;"></div>
+            <span class="error-msg" id="errPlace"></span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-glow btn-block"><i class="fas fa-paper-plane"></i> Create
+            Project</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- CREATE TEST PAGE (Quick Test via Phone) -->
+    <section class="page page-create-test" id="page-create-test">
+      <div class="form-container glass-card create-test-container">
+        <h2><i class="fas fa-vial"></i> Create Test</h2>
+        <p class="create-test-desc">Verify user by phone number, then enter ammonia reading to create a new test.</p>
+
+        <!-- Step Indicators -->
+        <div class="ct-steps-bar">
+          <div class="ct-step active" id="ctStep1Indicator"><span class="ct-step-num">1</span><span
+              class="ct-step-label">Phone</span></div>
+          <div class="ct-step-line"></div>
+          <div class="ct-step" id="ctStep2Indicator"><span class="ct-step-num">2</span><span
+              class="ct-step-label">Verify</span></div>
+          <div class="ct-step-line"></div>
+          <div class="ct-step" id="ctStep3Indicator"><span class="ct-step-num">3</span><span
+              class="ct-step-label">Ammonia</span></div>
+        </div>
+
+        <!-- Step 1: Phone Number Input -->
+        <div class="ct-step-content active" id="ctStep1">
+          <div class="form-group">
+            <label for="ctPhone"><i class="fas fa-phone"></i> Phone Number</label>
+            <input type="tel" id="ctPhone" placeholder="Enter registered phone number" required>
+            <span class="error-msg" id="ctPhoneError"></span>
+          </div>
+          <button class="btn btn-primary btn-glow btn-block" id="ctCheckUserBtn">
+            <i class="fas fa-search"></i> Look Up User
+          </button>
+        </div>
+
+        <!-- Step 2: User Verification -->
+        <div class="ct-step-content" id="ctStep2">
+          <div class="ct-user-card glass-card" id="ctUserCard">
+            <div class="ct-user-avatar"><i class="fas fa-user-circle"></i></div>
+            <div class="ct-user-details">
+              <h3 id="ctUserName">—</h3>
+              <div class="ct-user-info"><i class="fas fa-phone"></i> <span id="ctUserPhone">—</span></div>
+              <div class="ct-user-info"><i class="fas fa-envelope"></i> <span id="ctUserEmail">—</span></div>
+              <div class="ct-user-info"><i class="fas fa-map-marker-alt"></i> <span id="ctUserPlace">—</span></div>
+              <div class="ct-user-info"><i class="fas fa-flask"></i> <span id="ctUserTests">—</span> tests</div>
+            </div>
+          </div>
+          <p class="ct-confirm-text"><i class="fas fa-question-circle"></i> Is this your correct information?</p>
+          <div class="ct-step2-actions">
+            <button class="btn btn-secondary" id="ctBackToStep1"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="btn btn-primary btn-glow" id="ctConfirmUserBtn"><i class="fas fa-check"></i> Confirm &amp;
+              Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Success — prompt to enter ammonia via modal -->
+        <div class="ct-step-content" id="ctStep3">
+          <div class="ct-ammonia-prompt">
+            <i class="fas fa-flask-vial ct-ammonia-icon"></i>
+            <h3>Enter Ammonia Reading</h3>
+            <p>Click below to enter the ammonia value and create the test.</p>
+            <button class="btn btn-primary btn-glow" id="ctOpenAmmoniaModal"><i class="fas fa-plus"></i> Enter Ammonia
+              Value</button>
+            <button class="btn btn-secondary" id="ctBackToStep2" style="margin-top:10px;"><i
+                class="fas fa-arrow-left"></i> Back</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECT DASHBOARD PAGE -->
+    <section class="page page-dashboard" id="page-dashboard">
+      <button class="btn btn-back" onclick="navigateTo('projects')"><i class="fas fa-arrow-left"></i> Back to
+        Projects</button>
+      <div class="dashboard-header glass-card" id="dashboardHeader">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="tests-section">
+        <div class="tests-header">
+          <h3><i class="fas fa-flask"></i> Tests</h3>
+        </div>
+        <div class="tests-grid" id="testsGrid">
+          <!-- Filled dynamically -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ADD / EDIT TEST PAGE -->
+    <section class="page page-test-form" id="page-test-form">
+      <button class="btn btn-back" id="testFormBack"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+      <div class="form-container glass-card test-form-container">
+        <h2 id="testFormTitle"><i class="fas fa-flask"></i> Add New Test</h2>
+        <form id="testForm" novalidate>
+          <!-- WATER PARAMETERS -->
+          <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-tint"></i> Water Parameters</h3>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="wpPh">pH (0-14)</label>
+                <input type="number" id="wpPh" step="0.1" min="0" max="14" placeholder="e.g. 7.5">
+              </div>
+              <div class="form-group half">
+                <label for="wpDO">Dissolved Oxygen (mg/L)</label>
+                <input type="number" id="wpDO" step="0.1" min="0" placeholder="e.g. 6.2">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="wpTurbidity">Turbidity (NTU)</label>
+                <input type="number" id="wpTurbidity" step="0.1" min="0" placeholder="e.g. 25">
+              </div>
+              <div class="form-group half">
+                <label for="wpAmmonia">Ammonia (mg/L)</label>
+                <input type="number" id="wpAmmonia" step="0.01" min="0" placeholder="e.g. 0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="wpTemp">Temperature (°C)</label>
+              <input type="number" id="wpTemp" step="0.1" min="-10" max="60" placeholder="e.g. 28">
+            </div>
+          </div>
+
+          <!-- FISH PREDICTION -->
+          <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-fish"></i> Fish Species Prediction</h3>
+            <div class="form-group">
+              <label for="fpPredicted">Predicted Species (comma-separated)</label>
+              <input type="text" id="fpPredicted" placeholder="e.g. Tilapia, Catla, Rohu">
+            </div>
+            <div class="form-group">
+              <label for="fpRemoved">Removed Predators (comma-separated)</label>
+              <input type="text" id="fpRemoved" placeholder="e.g. Snakehead, Piranha">
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="fpSurface">Surface Species</label>
+                <input type="text" id="fpSurface" placeholder="e.g. Catla, Silver Carp">
+              </div>
+              <div class="form-group half">
+                <label for="fpMiddle">Middle Species</label>
+                <input type="text" id="fpMiddle" placeholder="e.g. Rohu, Tilapia">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="fpBottom">Bottom Species</label>
+                <input type="text" id="fpBottom" placeholder="e.g. Mrigal, Common Carp">
+              </div>
+              <div class="form-group half">
+                <label for="fpVegetation">Vegetation Species</label>
+                <input type="text" id="fpVegetation" placeholder="e.g. Grass Carp">
+              </div>
+            </div>
+          </div>
+
+          <!-- STACKING DATA -->
+          <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-layer-group"></i> Stacking Data</h3>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="sdCulture">Culture System</label>
+                <select id="sdCulture">
+                  <option value="">Select...</option>
+                  <option value="Monoculture">Monoculture</option>
+                  <option value="Polyculture">Polyculture</option>
+                  <option value="Integrated">Integrated</option>
+                  <option value="Composite">Composite</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label for="sdPriority">Priority</label>
+                <select id="sdPriority">
+                  <option value="">Select...</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="sdStatus">Status</label>
+              <select id="sdStatus">
+                <option value="">Select...</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sdRatio">Stocking Ratio (Species:Percentage, comma-separated)</label>
+              <input type="text" id="sdRatio" placeholder="e.g. Catla:12, Silver Carp:32, Rohu:22">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-glow btn-block" id="testSubmitBtn"><i
+              class="fas fa-save"></i> Save Test</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TEST VIEW PAGE (4 sections) -->
+    <section class="page page-test-view" id="page-test-view">
+      <!-- Print-only report header (hidden on screen) -->
+      <div class="print-report-header" id="printReportHeader">
+        <h1>🐟 Aqua Pro — Final Report</h1>
+        <p class="print-subtitle" id="printProjectName"></p>
+        <p class="print-subtitle" id="printTestInfo"></p>
+        <p class="print-date" id="printDate"></p>
+      </div>
+      <button class="btn btn-back" id="testViewBack"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+
+      <!-- Tab Navigation -->
+      <div class="test-tabs">
+        <button class="tab-btn active" data-tab="water"><i class="fas fa-tint"></i> Water Params</button>
+        <button class="tab-btn" data-tab="fish"><i class="fas fa-fish"></i> Fish Prediction</button>
+        <button class="tab-btn" data-tab="stacking"><i class="fas fa-layer-group"></i> Stacking Data</button>
+        <button class="tab-btn" data-tab="report"><i class="fas fa-file-alt"></i> Final Report</button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="tab-content active" id="tab-water">
+        <h3 class="section-heading"><i class="fas fa-tint"></i> Water Parameters</h3>
+        <div class="water-gauges" id="waterGauges"></div>
+      </div>
+
+      <div class="tab-content" id="tab-fish">
+        <h3 class="section-heading"><i class="fas fa-fish"></i> Fish Species Prediction</h3>
+        <div class="fish-section" id="fishSection"></div>
+      </div>
+
+      <div class="tab-content" id="tab-stacking">
+        <h3 class="section-heading"><i class="fas fa-layer-group"></i> Stacking Data</h3>
+        <div class="stacking-section" id="stackingSection"></div>
+      </div>
+
+      <div class="tab-content" id="tab-report">
+        <h3 class="section-heading"><i class="fas fa-file-alt"></i> Final Report</h3>
+        <div class="report-section" id="reportSection"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4><i class="fas fa-water"></i> About Aquaculture</h4>
+        <p>Aqua Pro is a state-of-the-art platform designed for aquaculture professionals to manage projects, monitor
+          water quality, predict species viability, and optimize stocking strategies.</p>
+      </div>
+      <div class="footer-col">
+        <h4><i class="fas fa-address-book"></i> Contact</h4>
+        <p><i class="fas fa-envelope"></i> info@aquaculturepro.com</p>
+        <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+        <p><i class="fas fa-map-marker-alt"></i> Bangalore, India</p>
+      </div>
+      <div class="footer-col">
+        <h4><i class="fas fa-share-alt"></i> Social</h4>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Aqua Pro. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Ammonia Input Modal -->
+  <div class="modal-overlay" id="ammoniaModal">
+    <div class="modal glass-card ammonia-modal">
+      <div class="ammonia-modal-header">
+        <i class="fas fa-flask-vial"></i>
+        <h3>Ammonia Value</h3>
+      </div>
+      <p>Enter the ammonia reading (mg/L) for this test. Other sensor values (pH, temperature, etc.) will be updated
+        later from the sensor system.</p>
+      <div class="form-group">
+        <label for="ammoniaInput"><i class="fas fa-flask"></i> Ammonia (mg/L)</label>
+        <input type="number" id="ammoniaInput" step="0.01" min="0" placeholder="e.g. 0.35">
+        <span class="error-msg" id="ammoniaError"></span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="ammoniaCancelBtn">Cancel</button>
+        <button class="btn btn-primary btn-glow" id="ammoniaSubmitBtn"><i class="fas fa-paper-plane"></i> Create
+          Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner">
+      <div class="spinner-ring"></div>
+      <i class="fas fa-fish spinner-icon"></i>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal glass-card">
+      <h3 id="confirmTitle">Confirm</h3>
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+        <button class="btn btn-danger" id="confirmOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+
+</html>

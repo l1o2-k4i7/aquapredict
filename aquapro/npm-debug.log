@@ -1,0 +1,192 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
+2 info using npm@3.5.2
+3 info using node@v8.10.0
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly install normalizeTree
+8 silly loadCurrentTree Finishing
+9 silly loadIdealTree Starting
+10 silly install loadIdealTree
+11 silly cloneCurrentTree Starting
+12 silly install cloneCurrentTreeToIdealTree
+13 silly cloneCurrentTree Finishing
+14 silly loadShrinkwrap Starting
+15 silly install loadShrinkwrap
+16 silly loadShrinkwrap Finishing
+17 silly loadAllDepsIntoIdealTree Starting
+18 silly install loadAllDepsIntoIdealTree
+19 silly fetchNamedPackageData dotenv
+20 silly mapToRegistry name dotenv
+21 silly mapToRegistry using default registry
+22 silly mapToRegistry registry https://registry.npmjs.org/
+23 silly mapToRegistry uri https://registry.npmjs.org/dotenv
+24 silly fetchNamedPackageData express
+25 silly mapToRegistry name express
+26 silly mapToRegistry using default registry
+27 silly mapToRegistry registry https://registry.npmjs.org/
+28 silly mapToRegistry uri https://registry.npmjs.org/express
+29 silly fetchNamedPackageData mongoose
+30 silly mapToRegistry name mongoose
+31 silly mapToRegistry using default registry
+32 silly mapToRegistry registry https://registry.npmjs.org/
+33 silly mapToRegistry uri https://registry.npmjs.org/mongoose
+34 verbose request uri https://registry.npmjs.org/mongoose
+35 verbose request no auth needed
+36 info attempt registry request try #1 at 10:02:23 AM
+37 verbose request id 5509aafedb47f448
+38 verbose etag W/"70e4264321d849e0f71d2520557af34c"
+39 verbose lastModified Fri, 03 Apr 2026 19:03:43 GMT
+40 http request GET https://registry.npmjs.org/mongoose
+41 verbose request uri https://registry.npmjs.org/dotenv
+42 verbose request no auth needed
+43 info attempt registry request try #1 at 10:02:23 AM
+44 verbose etag W/"c9ede8e56c09c63cccb2bbf5a79cfb63"
+45 verbose lastModified Sun, 12 Apr 2026 16:41:13 GMT
+46 http request GET https://registry.npmjs.org/dotenv
+47 verbose request uri https://registry.npmjs.org/express
+48 verbose request no auth needed
+49 info attempt registry request try #1 at 10:02:23 AM
+50 verbose etag W/"4e0839f437399658754ae18d0efc497e"
+51 verbose lastModified Wed, 01 Apr 2026 22:24:40 GMT
+52 http request GET https://registry.npmjs.org/express
+53 http 304 https://registry.npmjs.org/mongoose
+54 verbose headers { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+54 verbose headers   connection: 'keep-alive',
+54 verbose headers   server: 'cloudflare',
+54 verbose headers   'cf-ray': '9ebffc888bc87fa8-BLR',
+54 verbose headers   'cf-cache-status': 'HIT',
+54 verbose headers   'access-control-allow-origin': '*',
+54 verbose headers   age: '7',
+54 verbose headers   'cache-control': 'public, max-age=300',
+54 verbose headers   etag: '"70e4264321d849e0f71d2520557af34c"',
+54 verbose headers   'last-modified': 'Fri, 03 Apr 2026 19:03:43 GMT',
+54 verbose headers   vary: 'Accept-Encoding',
+54 verbose headers   'set-cookie':
+54 verbose headers    [ '_cfuvid=YvD9U7zfDTyvwwhJ9JjB9YP2BF1L_smCf0hJkoqL9bA-1776141144424-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] }
+55 silly get cb [ 304,
+55 silly get   { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+55 silly get     connection: 'keep-alive',
+55 silly get     server: 'cloudflare',
+55 silly get     'cf-ray': '9ebffc888bc87fa8-BLR',
+55 silly get     'cf-cache-status': 'HIT',
+55 silly get     'access-control-allow-origin': '*',
+55 silly get     age: '7',
+55 silly get     'cache-control': 'public, max-age=300',
+55 silly get     etag: '"70e4264321d849e0f71d2520557af34c"',
+55 silly get     'last-modified': 'Fri, 03 Apr 2026 19:03:43 GMT',
+55 silly get     vary: 'Accept-Encoding',
+55 silly get     'set-cookie':
+55 silly get      [ '_cfuvid=YvD9U7zfDTyvwwhJ9JjB9YP2BF1L_smCf0hJkoqL9bA-1776141144424-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] } ]
+56 verbose etag https://registry.npmjs.org/mongoose from cache
+57 verbose get saving mongoose to /home/aqua/.npm/registry.npmjs.org/mongoose/.cache.json
+58 http 304 https://registry.npmjs.org/dotenv
+59 verbose headers { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+59 verbose headers   connection: 'keep-alive',
+59 verbose headers   server: 'cloudflare',
+59 verbose headers   'cf-ray': '9ebffc88d92ee8e0-BLR',
+59 verbose headers   'cf-cache-status': 'HIT',
+59 verbose headers   'access-control-allow-origin': '*',
+59 verbose headers   age: '270',
+59 verbose headers   'cache-control': 'public, max-age=300',
+59 verbose headers   etag: '"c9ede8e56c09c63cccb2bbf5a79cfb63"',
+59 verbose headers   'last-modified': 'Sun, 12 Apr 2026 16:41:13 GMT',
+59 verbose headers   vary: 'Accept-Encoding',
+59 verbose headers   'set-cookie':
+59 verbose headers    [ '_cfuvid=tBifThoxPk4iLxGd0aXCFQpP4_ct4AqXLIlBmREj9lw-1776141144472-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] }
+60 silly get cb [ 304,
+60 silly get   { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+60 silly get     connection: 'keep-alive',
+60 silly get     server: 'cloudflare',
+60 silly get     'cf-ray': '9ebffc88d92ee8e0-BLR',
+60 silly get     'cf-cache-status': 'HIT',
+60 silly get     'access-control-allow-origin': '*',
+60 silly get     age: '270',
+60 silly get     'cache-control': 'public, max-age=300',
+60 silly get     etag: '"c9ede8e56c09c63cccb2bbf5a79cfb63"',
+60 silly get     'last-modified': 'Sun, 12 Apr 2026 16:41:13 GMT',
+60 silly get     vary: 'Accept-Encoding',
+60 silly get     'set-cookie':
+60 silly get      [ '_cfuvid=tBifThoxPk4iLxGd0aXCFQpP4_ct4AqXLIlBmREj9lw-1776141144472-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] } ]
+61 verbose etag https://registry.npmjs.org/dotenv from cache
+62 verbose get saving dotenv to /home/aqua/.npm/registry.npmjs.org/dotenv/.cache.json
+63 http 304 https://registry.npmjs.org/express
+64 verbose headers { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+64 verbose headers   connection: 'keep-alive',
+64 verbose headers   server: 'cloudflare',
+64 verbose headers   'cf-ray': '9ebffc89a87cd817-BLR',
+64 verbose headers   'cf-cache-status': 'HIT',
+64 verbose headers   'access-control-allow-origin': '*',
+64 verbose headers   age: '295',
+64 verbose headers   'cache-control': 'public, max-age=300',
+64 verbose headers   etag: '"4e0839f437399658754ae18d0efc497e"',
+64 verbose headers   'last-modified': 'Wed, 01 Apr 2026 22:24:40 GMT',
+64 verbose headers   vary: 'Accept-Encoding',
+64 verbose headers   'set-cookie':
+64 verbose headers    [ '_cfuvid=wpUtfOTDZ0NIpx_lqNRNYYbLFV4duKfisDnXW.MYD1c-1776141144601-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] }
+65 silly get cb [ 304,
+65 silly get   { date: 'Tue, 14 Apr 2026 04:32:24 GMT',
+65 silly get     connection: 'keep-alive',
+65 silly get     server: 'cloudflare',
+65 silly get     'cf-ray': '9ebffc89a87cd817-BLR',
+65 silly get     'cf-cache-status': 'HIT',
+65 silly get     'access-control-allow-origin': '*',
+65 silly get     age: '295',
+65 silly get     'cache-control': 'public, max-age=300',
+65 silly get     etag: '"4e0839f437399658754ae18d0efc497e"',
+65 silly get     'last-modified': 'Wed, 01 Apr 2026 22:24:40 GMT',
+65 silly get     vary: 'Accept-Encoding',
+65 silly get     'set-cookie':
+65 silly get      [ '_cfuvid=wpUtfOTDZ0NIpx_lqNRNYYbLFV4duKfisDnXW.MYD1c-1776141144601-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None' ] } ]
+66 verbose etag https://registry.npmjs.org/express from cache
+67 verbose get saving express to /home/aqua/.npm/registry.npmjs.org/express/.cache.json
+68 silly resolveWithNewModule dotenv@16.6.1 checking installable status
+69 silly cache add args [ 'dotenv@^16.3.1', null ]
+70 verbose cache add spec dotenv@^16.3.1
+71 silly cache add parsed spec Result {
+71 silly cache add   raw: 'dotenv@^16.3.1',
+71 silly cache add   scope: null,
+71 silly cache add   name: 'dotenv',
+71 silly cache add   rawSpec: '^16.3.1',
+71 silly cache add   spec: '>=16.3.1 <17.0.0',
+71 silly cache add   type: 'range' }
+72 silly addNamed dotenv@>=16.3.1 <17.0.0
+73 verbose addNamed ">=16.3.1 <17.0.0" is a valid semver range for dotenv
+74 silly addNameRange { name: 'dotenv', range: '>=16.3.1 <17.0.0', hasData: false }
+75 silly mapToRegistry name dotenv
+76 silly mapToRegistry using default registry
+77 silly mapToRegistry registry https://registry.npmjs.org/
+78 silly mapToRegistry uri https://registry.npmjs.org/dotenv
+79 verbose addNameRange registry:https://registry.npmjs.org/dotenv not in flight; fetching
+80 verbose stack Error: Missing required argument #1
+80 verbose stack     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+80 verbose stack     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+80 verbose stack     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+80 verbose stack     at /usr/share/npm/lib/install/deps.js:457:7
+80 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+80 verbose stack     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+80 verbose stack     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+80 verbose stack     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+80 verbose stack     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+80 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+81 verbose cwd /home/aqua/aquapredict/aquapro
+82 error Linux 4.9.253-tegra
+83 error argv "/usr/bin/node" "/usr/bin/npm" "install"
+84 error node v8.10.0
+85 error npm  v3.5.2
+86 error code EMISSINGARG
+87 error typeerror Error: Missing required argument #1
+87 error typeerror     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+87 error typeerror     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+87 error typeerror     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+87 error typeerror     at /usr/share/npm/lib/install/deps.js:457:7
+87 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+87 error typeerror     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+87 error typeerror     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+87 error typeerror     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+87 error typeerror     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+87 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+88 error typeerror This is an error with npm itself. Please report this error at:
+88 error typeerror     <http://github.com/npm/npm/issues>
+89 verbose exit [ 1, true ]
